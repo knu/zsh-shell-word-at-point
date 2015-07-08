@@ -1,0 +1,87 @@
+# -*- mode: sh -*-
+#
+# shell-word-at-point - zle function to get a shell word at point
+#
+# Copyright (c) 2015 Akinori MUSHA
+# Licensed under the 2-clause BSD license.
+#
+# This file contains several functions to help deal with a shell word
+# at point.
+#
+# - shell-word-at-point() sets a shell word at point to a global
+#   variable shell_word.
+#
+# - edit-file-at-point() invokes EDITOR (default: vi) passing a file
+#   name at point.
+#
+# - view-file-at-point() invokes PAGER (default: more) passing a file
+#   name at point.
+#
+# Usage:
+#     autoload -Uz shell-word-at-point
+#     shell-word-at-point
+#     bindkey '^X^F' edit-file-at-point
+#     bindkey '^X^R' view-file-at-point
+#
+
+autoload match-words-by-style
+
+shell-word-at-point () {
+    emulate -L zsh
+    local qword
+    local -a matched_words
+
+    match-words-by-style -w shell
+    [[ -n $matched_words[3] ]] || qword=$matched_words[2]
+    [[ -n $matched_words[4] ]] || qword=$qword$matched_words[5]
+
+    # Delete a trailing space match-words-by-style leaves in
+    # <word-after-cursor>.
+    shell_word=${(z)qword}
+
+    [[ -n $shell_word ]]
+}
+
+zle -N shell-word-at-point
+
+edit-file-at-point () {
+    emulate -L zsh
+    local shell_word
+
+    zle shell-word-at-point
+
+    if [[ -z $shell_word ]]; then
+        echo -n '\a'
+        return 1
+    fi
+
+    if [[ ! -e ${(Q)~shell_word} ]]; then
+        echo
+        read -q key"?zsh: Edit a new file \"$shell_word\" ([y]es, [n]o)? "
+        echoti cuu1
+        zle reset-prompt
+        [[ $key = y ]] || return 1
+    fi
+
+    zle -I
+    eval "${(q)EDITOR-vi} ${shell_word} < ${(q)TTY}"
+}
+
+zle -N edit-file-at-point
+
+view-file-at-point () {
+    emulate -L zsh
+    local shell_word
+
+    zle shell-word-at-point
+
+    if [[ -z $shell_word || ! -e ${(Q)~shell_word} ]]; then
+        echo -n '\a'
+        return 1
+    fi
+
+    zle -I
+    eval "${(q)PAGER-more} ${shell_word} < ${(q)TTY}"
+}
+
+zle -N view-file-at-point
