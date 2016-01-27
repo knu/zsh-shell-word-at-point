@@ -42,7 +42,7 @@ Here's example bindings for Emacs users:
 License
 -------
 
-Copyright (c) 2015 Akinori MUSHA
+Copyright (c) 2015-2016 Akinori MUSHA
 
 Licensed under the 2-clause BSD license.
 See `LICENSE` for details.
