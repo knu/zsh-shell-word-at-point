@@ -47,62 +47,70 @@ zle -N shell-word-at-point
 shell-word-at-point--extract-filename () {
     emulate -L zsh
     setopt extended_glob
-    local word=$1
+    local word=$1 lineno
+
+    filename_at_point=
+    lineno_at_point=
 
     for word in $word ${word#?*=}; do
-        for word in $word ${word%:[0-9]##}; do
+        if [[ -e ${(Q)~word} ]]; then
+            break
+        fi
+        if [[ $word =~ ^(.+):0*([1-9][0-9]*)$ ]]; then
+            word=$match[1]
+            lineno=$match[2]
             if [[ -e ${(Q)~word} ]]; then
-                print ${(Q)~word}
-                return
+                lineno_at_point=$lineno
+                break
             fi
-        done
+        fi
     done
 
-    print ${(Q)~word}
+    filename_at_point=${(Q)~word}
 }
 
 edit-file-at-point () {
     emulate -L zsh
-    local shell_word filename
+    local shell_word filename_at_point lineno_at_point
 
     zle shell-word-at-point
 
-    filename=$(shell-word-at-point--extract-filename ${(Q)~shell_word})
+    shell-word-at-point--extract-filename ${(Q)~shell_word}
 
-    if [[ -z $filename ]]; then
+    if [[ -z $filename_at_point ]]; then
         echo -n '\a'
         return 1
     fi
 
-    if [[ ! -e $filename ]]; then
+    if [[ ! -e $filename_at_point ]]; then
         echo
-        read -q key"?zsh: Edit a new file \"$filename\" ([y]es, [n]o)? "
+        read -q key"?zsh: Edit a new file \"$filename_at_point\" ([y]es, [n]o)? "
         echoti cuu1
         zle reset-prompt
         [[ $key = y ]] || return 1
     fi
 
     zle -I
-    eval "${(q)EDITOR-vi} ${(q)filename} < ${(q)TTY}"
+    eval "${(q)EDITOR-vi} ${lineno_at_point:+"+$lineno_at_point "}${(q)filename_at_point} < ${(q)TTY}"
 }
 
 zle -N edit-file-at-point
 
 view-file-at-point () {
     emulate -L zsh
-    local shell_word
+    local shell_word filename_at_point lineno_at_point
 
     zle shell-word-at-point
 
-    filename=$(shell-word-at-point--extract-filename ${(Q)~shell_word})
+    shell-word-at-point--extract-filename ${(Q)~shell_word}
 
-    if [[ -z $filename || ! -e $filename ]]; then
+    if [[ -z $filename_at_point || ! -e $filename_at_point ]]; then
         echo -n '\a'
         return 1
     fi
 
     zle -I
-    eval "${(q)PAGER-more} ${(q)filename} < ${(q)TTY}"
+    eval "${(q)PAGER-more} ${lineno_at_point:+"+$lineno_at_point "}${(q)filename_at_point} < ${(q)TTY}"
 }
 
 zle -N view-file-at-point
