@@ -28,12 +28,20 @@ autoload match-words-by-style
 
 shell-word-at-point () {
     emulate -L zsh
-    local qword
+    local cursor qword
     local -a matched_words
+
+    # Ignore trailing spaces if at EOL
+    if [[ $RBUFFER =~ (\n|$) && $LBUFFER =~ [^\ ](\ +)$ ]]; then
+        cursor=$CURSOR
+        ((CURSOR-=$#match[1]))
+    fi
 
     match-words-by-style -w shell
     [[ -n $matched_words[3] ]] || qword=$matched_words[2]
     [[ -n $matched_words[4] ]] || qword=$qword$matched_words[5]
+
+    [[ -z $cursor ]] || CURSOR=$cursor
 
     # Delete a trailing space match-words-by-style leaves in
     # <word-after-cursor>.
