@@ -61,20 +61,20 @@ shell-word-at-point--extract-filename () {
     lineno_at_point=
 
     for word in $word ${word#?*=}; do
-        if [[ -e ${(Q)~word} ]]; then
+        if [[ -e ${(Q)~word} ]] || filename_at_point="$(whence -p ${(Q)~word})"; then
             break
         fi
         if [[ $word =~ ^(.+):0*([1-9][0-9]*)$ ]]; then
             word=$match[1]
             lineno=$match[2]
-            if [[ -e ${(Q)~word} ]]; then
+            if [[ -e ${(Q)~word} ]] || filename_at_point="$(whence -p ${(Q)~word})"; then
                 lineno_at_point=$lineno
                 break
             fi
         fi
     done
 
-    filename_at_point=${(Q)~word}
+    : ${filename_at_point:=${(Q)~word}}
 }
 
 edit-file-at-point () {
