@@ -31,8 +31,8 @@ shell-word-at-point () {
     local cursor qword
     local -a matched_words
 
-    # Ignore trailing spaces if at EOL
-    if [[ $RBUFFER =~ (\n|$) && $LBUFFER =~ [^\ ](\ +)$ ]]; then
+    # Ignore spaces in the left if there is no word at the cursor
+    if [[ $RBUFFER =~ ^([\ \n]|$) && $LBUFFER =~ [^\ ](\ +)$ ]]; then
         cursor=$CURSOR
         ((CURSOR-=$#match[1]))
     fi
