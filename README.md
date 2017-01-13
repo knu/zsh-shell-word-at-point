@@ -22,8 +22,12 @@ provides the following functions to fill the needs.
 - `view-file-at-point` invokes `PAGER` (default: `more`) passing a
   file name at point.
 
+- `run-shell-word-at-point` opens a new command line with only the
+  current shell word set, pushing the whole command line with
+  `push-line`.
+
 After closing `EDITOR` or `PAGER`, you will be back on the command
-line.
+line exactly with the previous status.
 
 How to set up
 -------------
@@ -38,6 +42,7 @@ Here's example bindings for Emacs users:
 
     bindkey '^X^F' edit-file-at-point
     bindkey '^X^R' view-file-at-point
+    bindkey '^[!' run-shell-word-at-point
 
 License
 -------

@@ -8,14 +8,21 @@
 # This file contains several functions to help deal with a shell word
 # at point.
 #
-# - shell-word-at-point() sets a shell word at point to a global
-#   variable shell_word.
+# - `shell-word-at-point` sets a shell word at point to a global
+#   variable `shell_word`.
 #
-# - edit-file-at-point() invokes EDITOR (default: vi) passing a file
+# - `edit-file-at-point` invokes `EDITOR` (default: `vi`) passing a file
 #   name at point.
 #
-# - view-file-at-point() invokes PAGER (default: more) passing a file
-#   name at point.
+# - `view-file-at-point` invokes `PAGER` (default: `more`) passing a
+#   file name at point.
+#
+# - `run-shell-word-at-point` opens a new command line with only the
+#   current shell word set, pushing the whole command line with
+#   `push-line`.
+#
+# After closing `EDITOR` or `PAGER`, you will be back on the command
+# line exactly with the previous status.
 #
 # Usage:
 #     autoload -Uz shell-word-at-point
@@ -122,3 +129,15 @@ view-file-at-point () {
 }
 
 zle -N view-file-at-point
+
+run-shell-word-at-point () {
+    emulate -L zsh
+    local shell_word
+
+    zle shell-word-at-point
+
+    zle push-line
+    BUFFER=" $shell_word"
+}
+
+zle -N run-shell-word-at-point
