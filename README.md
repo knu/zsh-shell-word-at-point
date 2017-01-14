@@ -44,6 +44,18 @@ Here's example bindings for Emacs users:
     bindkey '^X^R' view-file-at-point
     bindkey '^[!' run-shell-word-at-point
 
+##### integrate into `.zprezto` project
+
+    > git clone --depth=1 <current_project> ~/.zprezto/modules
+    > add to ~/.zpreztorc
+
+```zsh
+zstyle ':prezto:load' pmodule
+    ....
+    'zsh-shell-word-at-point'`
+```
+
+
 License
 -------
 
