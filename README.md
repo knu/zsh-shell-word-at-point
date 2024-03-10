@@ -13,8 +13,9 @@ Unless I am missing something, zsh does not provide the "ffap"
 (find-file-at-point) functionality out of the box.  This library
 provides the following functions to fill the needs.
 
-- `shell-word-at-point` sets a shell word at point to a global
-  variable `shell_word`.
+- `shell-word-at-point` sets the global variable `shell_word` to the
+  raw shell word at point and `shell_word_position` to the zero-based
+  index of where it starts.
 
 - `edit-file-at-point` invokes `EDITOR` (default: `vi`) passing a file
   name at point.

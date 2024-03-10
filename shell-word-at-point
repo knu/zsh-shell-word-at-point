@@ -2,14 +2,15 @@
 #
 # shell-word-at-point - zle function to get a shell word at point
 #
-# Copyright (c) 2015-2023 Akinori MUSHA
+# Copyright (c) 2015-2024 Akinori MUSHA
 # Licensed under the 2-clause BSD license.
 #
 # This file contains several functions to help deal with a shell word
 # at point.
 #
-# - `shell-word-at-point` sets a shell word at point to a global
-#   variable `shell_word`.
+# - `shell-word-at-point` sets the global variable `shell_word` to the
+#   raw shell word at point and `shell_word_position` to the
+#   zero-based index of where it starts.
 #
 # - `edit-file-at-point` invokes `EDITOR` (default: `vi`) passing a file
 #   name at point.
@@ -38,20 +39,21 @@ shell-word-at-point () {
     local cursor qword
     local -a matched_words
 
-    # Ignore spaces in the left if there is no word at the cursor
-    if [[ $RBUFFER =~ ^([\ \n]|$) && $LBUFFER =~ [^\ ](\ +)$ ]]; then
-        cursor=$CURSOR
-        ((CURSOR-=$#match[1]))
+    match-words-by-style -w shell
+
+    if [[ -z $matched_words[2] || -n $matched_words[3] ]] && [[ -n $matched_words[5] ]]; then
+        # If there is no word before cursor or cursor is after whitespace, take the next word if any.
+        shell_word_position=$(($#matched_words[1]+$#matched_words[2]+$#matched_words[3]+$#matched_words[4]))
+        qword=$matched_words[5]
+    else
+        shell_word_position=$#matched_words[1]
+        qword=$matched_words[2]
+        [[ -z $matched_words[3] && -z $matched_words[4] ]] && qword+=$matched_words[5]
     fi
 
-    match-words-by-style -w shell
-    [[ -n $matched_words[3] ]] || qword=$matched_words[2]
-    [[ -n $matched_words[4] ]] || qword=$qword$matched_words[5]
-
-    [[ -z $cursor ]] || CURSOR=$cursor
-
-    # Delete a trailing space match-words-by-style leaves in
-    # <word-after-cursor>.
+    # Work around a bug in match-words-by-style that it leaves a
+    # trailing whitespace in <word-after-cursor> instead of including
+    # it in <whitespace-after-word>.
     shell_word=${(z)qword}
 
     [[ -n $shell_word ]]
