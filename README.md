@@ -17,6 +17,10 @@ provides the following functions to fill the needs.
   raw shell word at point and `shell_word_position` to the zero-based
   index of where it starts.
 
+- `copy-whole-shell-word` copies the shell word at point as kill.
+
+- `kill-whole-shell-word` kills the shell word at point.
+
 - `edit-file-at-point` invokes `EDITOR` (default: `vi`) passing a file
   name at point.
 
@@ -41,6 +45,8 @@ these lines to your `.zshrc`:
 
 Here's example bindings for Emacs users:
 
+    bindkey '^[^W' copy-whole-shell-word
+    bindkey '^[^K' kill-whole-shell-word
     bindkey '^X^F' edit-file-at-point
     bindkey '^X^R' view-file-at-point
     bindkey '^[!' run-shell-word-at-point
@@ -48,7 +54,7 @@ Here's example bindings for Emacs users:
 License
 -------
 
-Copyright (c) 2015-2023 Akinori MUSHA
+Copyright (c) 2015-2024 Akinori MUSHA
 
 Licensed under the 2-clause BSD license.
 See `LICENSE` for details.

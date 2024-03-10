@@ -61,6 +61,35 @@ shell-word-at-point () {
 
 zle -N shell-word-at-point
 
+copy-whole-shell-word () {
+    emulate -L zsh
+    local shell_word shell_word_position
+
+    zle shell-word-at-point
+
+    if [[ -n $shell_word ]]; then
+        zle copy-region-as-kill -- $shell_word
+    fi
+}
+
+zle -N copy-whole-shell-word
+
+kill-whole-shell-word () {
+    emulate -L zsh
+    local shell_word shell_word_position
+
+    zle shell-word-at-point
+
+    if [[ -n $shell_word ]]; then
+        local buffer=$BUFFER
+        RBUFFER=${buffer[1+$shell_word_position+$#shell_word,-1]}
+        LBUFFER=${buffer[1,$shell_word_position]}
+        zle copy-region-as-kill -- $shell_word
+    fi
+}
+
+zle -N kill-whole-shell-word
+
 shell-word-at-point--extract-filename () {
     emulate -L zsh
     setopt extended_glob
